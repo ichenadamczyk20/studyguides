@@ -8,6 +8,9 @@ import (
 )
 
 func main() {
+	err := DBinit()
+	if err != nil {log.Fatal(err)}
+	defer DBclose()
 	http.HandleFunc("/create", create)
 	http.HandleFunc("/edit/", edit)
 	http.HandleFunc("/guide/", guide)
@@ -17,7 +20,16 @@ func main() {
 }
 func guide(w http.ResponseWriter, r *http.Request) {
 	path := r.URL.Path[len("/guide/"):]
-	fmt.Fprintf(w, "You requested the guide: %s", path)
+	content, notFound, err := DBget(path)
+	if err != nil {
+		if notFound {
+			http.NotFound(w, r)
+		} else {
+			http.Error(w, "Internal Server Error" + err.Error(), http.StatusInternalServerError)
+		}
+		return
+	}
+	fmt.Fprintf(w, "You requested the guide: %s\nContent: %s\n", path, content)
 }
 func edit(w http.ResponseWriter, r *http.Request) {
 	path := r.URL.Path[len("/edit/"):]
@@ -36,7 +48,21 @@ func create(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Either the title or the content are missing", http.StatusBadRequest)
 			return
 		}
-		//add to database here
+		_, notFound, err := DBget(r.FormValue("title"))
+		if err != nil {
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+		if !notFound {
+			http.Error(w, "Guide already exists; edit it instead", http.StatusBadRequest)
+			return
+		}
+		err = DBinsert(r.FormValue("title"), r.FormValue("content"))
+		if err != nil {
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			log.Println(err)
+			return
+		}
 		http.Redirect(w, r, "/guide/" + url.PathEscape(r.FormValue("title")), http.StatusFound)
 	default:
 		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
@@ -52,5 +78,4 @@ func home(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 	}
 }
-
 
