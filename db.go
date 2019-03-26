@@ -3,38 +3,64 @@ package main
 import (
 	_ "github.com/mattn/go-sqlite3"
 	"database/sql"
-	"errors"
 )
+
+type Guide struct {
+	Subject, Title, Content string
+}
 
 var db *sql.DB
 
 func DBinit() error {
 	var err error
-	db, err = sql.Open("sqlite3", "./database.sqlite")
+	db, err = sql.Open("sqlite3", "file:./database.sqlite?cache=shared&mode=rwc")
 	if err != nil {
 		return err
 	}
-	_, err = db.Exec("CREATE TABLE IF NOT EXISTS guides (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT UNIQUE, content TEXT)")
+	_, err = db.Exec("CREATE TABLE IF NOT EXISTS guides (id INTEGER PRIMARY KEY AUTOINCREMENT, subject TEXT, title TEXT UNIQUE, content TEXT)")
 	return err
 }
-func DBinsert(title, content string) error {
-	_, err := db.Exec("INSERT INTO guides (title, content) VALUES (?, ?)", title, content)
+func DBinsert(subject, title, content string) error {
+	_, err := db.Exec("INSERT INTO guides (subject, title, content) VALUES (?, ?, ?)", subject, title, content)
 	return err
 }
-func DBget(title string) (string, bool, error) {
-	rows, err := db.Query("SELECT content FROM guides WHERE title = ?", title)
+func DBedit(title, content string) error {
+	_, err := db.Exec("UPDATE \"guides\" SET content = ? WHERE title = ?", content, title)
+	return err
+}
+func DBget(title string) (Guide, bool, error) {
+	rows, err := db.Query("SELECT content, subject FROM guides WHERE title = ?", title)
 	if err != nil {
-		return "", false, err
+		return Guide{}, false, err
 	}
+	defer rows.Close()
 	if rows.Next() {
-		var content string
-		err = rows.Scan(&content)
+		var content, subject string
+		err = rows.Scan(&content, &subject)
 		if err != nil {
-			return "", false, err
+			return Guide{}, false, err
 		}
-		return content, false, nil
+		return Guide{subject, title, content}, false, nil
 	}
-	return "", true, errors.New("No guide found")
+	return Guide{}, true, nil
 }
+func DBgetAll() ([]Guide, error) {
+	rows, err := db.Query("SELECT subject, title, content FROM guides")
+	if err != nil {
+		return []Guide{}, err
+	}
+	defer rows.Close()
+	returnval := make([]Guide, 0)
+	for rows.Next() {
+		var c, t, s string
+		err = rows.Scan(&s, &t, &c)
+		if err != nil {
+			return []Guide{}, err
+		}
+		returnval = append(returnval, Guide{s, t, c})
+	}
+	return returnval, nil
+}
+
 func DBclose() {db.Close()}
 

@@ -67,7 +67,7 @@
 			<a href="https://stuysu.org"><div id="studentunion"><p>Student Union</p></div></a>
 			<a href="/"><div id="home"><p>Study Guides List</p></div></a>
 			<a href="/about/"><div id="about"><p>About</p></div></a>
-			<a href="/create/"><div id="submit"><p>Submit</p></div></a>
+			<a href="/create"><div id="submit"><p>Submit</p></div></a>
 			<a href="/edit/"><div id="edit"><p>Edit</p></div></a>
 			<!--<div id="searchbar">
 				<input id="searchinput" onfocus="showsearchbar()" onblur="blursearchbar()" type="text" />
@@ -92,10 +92,10 @@ function updatesearchbar(value) {
 		<div id="toolbar-container"></div>
 		<div id="guide-container"></div>
 		<form action="/edit/{{.Title}}" method="POST" id="submit-container">
-			<h2>Updating {{.Title}}</h2>
+			<h2>Updating {{.Title}} (subject {{.Subject}})</h2>
 			<p>What did you update in this study guide? <input type="text" name="changelog"></p><!-- TODO: make changelog -->
 			Content: <br>
-			<textarea rows="20" cols="80"></textarea><br>
+			<textarea name="content" rows="20" cols="80">{{.Content}}</textarea><br>
 			<input type="submit" value="Edit it">
 		</form>
 		<!--<script>
