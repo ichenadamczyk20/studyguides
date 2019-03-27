@@ -22,6 +22,8 @@ func main() {
 	http.HandleFunc("/create", create)
 	http.HandleFunc("/edit/", edit)
 	http.HandleFunc("/guide/", guide)
+	fs := http.FileServer(http.Dir("static"))
+	http.Handle("/static/", http.StripPrefix("/static", fs))
 	http.HandleFunc("/", home)
 	log.Fatal(http.ListenAndServe(":8080", nil))
 	log.Println("Running stuyguides")
@@ -62,11 +64,11 @@ func edit(w http.ResponseWriter, r *http.Request) {
 	case "GET":
 		executeTemplate(w, "edit.html", guide)
 	case "POST":
-		if r.FormValue("content") == "" {
+		if r.FormValue("content") == "" || r.FormValue("delta") == "" {
 			http.Error(w, "The updated content of the guide is missing", http.StatusBadRequest)
 			return
 		}
-		err = DBedit(path, r.FormValue("content"))
+		err = DBedit(path, r.FormValue("content"), r.FormValue("delta"))
 		if err != nil {
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			log.Println(err)
@@ -85,8 +87,8 @@ func create(w http.ResponseWriter, r *http.Request) {
 	case "GET":
 		executeTemplate(w, "create.html", "")
 	case "POST":
-		if r.FormValue("content") == "" || r.FormValue("subject") == "" || r.FormValue("title") == "" {
-			http.Error(w, "Either the title or the content are missing", http.StatusBadRequest)
+		if r.FormValue("content") == "" || r.FormValue("delta") == "" || r.FormValue("subject") == "" || r.FormValue("title") == "" {
+			http.Error(w, "Either the title, the subject or the content are missing", http.StatusBadRequest)
 			return
 		}
 		_, notFound, err := DBget(r.FormValue("title"))
@@ -99,7 +101,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 			log.Println(err)
 			return
 		}
-		err = DBinsert(r.FormValue("subject"), r.FormValue("title"), r.FormValue("content"))
+		err = DBinsert(r.FormValue("subject"), r.FormValue("title"), r.FormValue("content"), r.FormValue("delta"))
 		if err != nil {
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			log.Println(err)

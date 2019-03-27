@@ -3,79 +3,57 @@
 	<head>
 		<meta charset="utf-8">
 		<title>Study Guide Website</title>
-		<link href="/header.css" rel="stylesheet" />
+		<link href="/static/header.css" rel="stylesheet" />
 		<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
-		<script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
 		<style>
-				header, header div, header div:hover {
-						background: rgb(250, 250, 250);
-				}
-				header div:hover {
-						background: rgb(240, 240, 240);
-				}
-				body, html {
-						overflow-y: hidden;
-				}
-				#edit {
-						display: none;
-				}
-				#searchresults {
-						width: calc(100% - 13em);
-						position: fixed;
-						top: 30px;
-						right: 0%;
-						background: white;
-						text-align: center;
-						height: 0px;
-						display: none;
-				}
-				#guide-container {
-						margin-top: 30px;
-						margin-left: 15px;
-						height: calc(100% - 30px);
-						width: calc(100% - 30px);
-						margin-top: 30px;
-						margin-left: 0px;
-						height: calc(100% - 30px);
-						width: calc(100%);
-						background: white;
-				}
-				#guide-container iframe {
-						height: calc(100%);
-						width: calc(100%);
-						margin: 0;
-						border: none;
-				}
+			header, header div, header div:hover {
+				background: rgb(250, 250, 250);
+			}
+			header div:hover {
+				background: rgb(240, 240, 240);
+			}
+			body, html {
+				overflow-y: hidden;
+			}
+			#edit {
+				display: none;
+			}
+			#searchresults {
+				width: calc(100% - 13em);
+				position: fixed;
+				top: 30px;
+				right: 0%;
+				background: white;
+				text-align: center;
+				height: 0px;
+				display: none;
+			}
+			#guide-container {
+				margin-top: 30px;
+				margin-left: 15px;
+				min-height: calc(100% - 30px);
+				width: calc(100% - 30px);
+				height: auto;
+				background: white;
+			}
+			body {
+				overflow-y: scroll;
+				height: inherit;
+			}
 		</style>
 	</head>
 	<body>
 		<header>
 			<a href="https://stuysu.org"><div id="studentunion"><p>Student Union</p></div></a>
 			<a href="/"><div id="home"><p>Study Guides List</p></div></a>
-			<a href="/about/"><div id="about"><p>About</p></div></a>
+			<a href="/about"><div id="about"><p>About</p></div></a>
 			<a href="/create"><div id="submit"><p>Submit</p></div></a>
 			<a href="/edit/"><div id="edit"><p>Edit</p></div></a>
 		</header>
-		<div id="#guide-container">
-			<h2>{{.Subject}}: {{.Title}}</h2>
+		<div id="guide-container">
+			<h1>{{.Subject}}: {{.Title}}</h1>
 			<p><a href="/edit/{{.Title}}">Edit this guide</a></p>
-			<p>{{.Content}}</p>
+			<div class="ql-editor">{{.Content}}</div>
 		</div>
-		<!--<script>
-		const quill = new Quill('#guide-container', {
-			readOnly: true,
-			placeholder: "Study guide goes in here.",
-			theme: 'snow', 
-			toolbar: false,
-			modules: {
-				toolbar: [],
-			},
-		});
-		quill.setContents([
-			{ insert: 'Hello ' },
-			{ insert: 'World!', attributes: { bold: true } },
-			{ insert: '\n' } //Ex delta data
-		]); //DELTA OBJECT DATA GOES IN HERE-->
-		</script>
 	</body>
 </html>
