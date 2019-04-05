@@ -8,6 +8,7 @@ These are the tasks we need to complete
 
 ### Backend
 * [ ] cleanup code
+	* [ ] Safety features in session storage
 * [ ] use postgresql
 
 ### Frontend

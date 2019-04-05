@@ -5,6 +5,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"database/sql"
 	"html/template"
+	"errors"
 )
 
 type Guide struct {
@@ -77,33 +78,34 @@ func DBcreateUser(username, password string) error {
 	if err != nil {
 		return err
 	}
-	_, err := db.Exec("INSERT INTO users (username, password) VALUES (?, ?)", username, string(hashed))
+	_, err = db.Exec("INSERT INTO users (username, password) VALUES (?, ?)", username, string(hashed))
 	if err != nil {
 		return err
 	}
+	return nil
 }
-func DBlogIn(username, password string) error {
+func DBlogIn(username, password string) (bool, error) {
 	rows, err := db.Query("SELECT password FROM users WHERE username = ?", username)
 	if err != nil {
-		return err
+		return false, err
 	}
 	defer rows.Close()
 	if rows.Next() {
 		var hashed string
 		err = rows.Scan(&hashed)
 		if err != nil {
-			return err
+			return false, err
 		}
-		err = bcrypt.CompareHashAndPassword(hashed, password)
+		err = bcrypt.CompareHashAndPassword([]byte(hashed), []byte(password))
 		if err != nil {
-			return err
+			return false, nil
 		}
-		return nil
+		return true, nil
 	}
-	return errors.New("User not found")
+	return false, errors.New("User not found")
 }
 // TODO: Combine title and subject into one thing! Never change independently and are a PITA to handle separately
-func DBgetOfUser(username string) []struct{Title, Subject string} { //returns title/subjects of guides the user has created
+func DBgetOfUser(username string) ([]struct{Title, Subject string}, error) { //returns title/subjects of guides the user has created
 	rows, err := db.Query("SELECT title, subject FROM guides WHERE creator = ?", username)
 	if err != nil {
 		return []struct{Title, Subject string}{}, err
@@ -116,7 +118,7 @@ func DBgetOfUser(username string) []struct{Title, Subject string} { //returns ti
 		if err != nil {
 			return []struct{Title, Subject string}{}, err
 		}
-		returnval = append(returnval, struct{Title, Subject string}{titleGuide{s, t, template.HTML(c), d, cr}, subject})
+		returnval = append(returnval, struct{Title, Subject string}{title, subject})
 	}
 	return returnval, nil
 }
