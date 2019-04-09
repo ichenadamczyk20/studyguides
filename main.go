@@ -32,6 +32,11 @@ func main() {
 	http.HandleFunc("/create", create)
 	http.HandleFunc("/edit/", edit)
 	http.HandleFunc("/guide/", guide)
+
+	http.HandleFunc("/login", login)
+	http.HandleFunc("/logout", logout)
+	http.HandleFunc("/account", account)
+	http.HandleFunc("/createAccount", createAccount)
 	fs := http.FileServer(http.Dir("static"))
 	http.Handle("/static/", http.StripPrefix("/static", fs))
 	http.HandleFunc("/", home)
@@ -154,6 +159,99 @@ func create(w http.ResponseWriter, r *http.Request) {
 // }}}
 
 // User methods: {{{
+func login(w http.ResponseWriter, r *http.Request) {
+	_, err, status := authUser(r)
+	if status != http.StatusUnauthorized {
+		http.Redirect(w, r, "/", http.StatusFound)
+		return
+	} else if err != nil {
+		http.Error(w, "Internal Server Error: " + err.Error(), http.StatusInternalServerError)
+		return
+	}
+	switch r.Method {
+	case "GET":
+		executeTemplate(w, "login.html", "")
+	case "POST":
+		if r.FormValue("username") == "" || r.FormValue("password") == "" {
+			http.Error(w, "Either the username or the password is missing", http.StatusBadRequest)
+			return
+		}
+		loggedin, err := DBlogIn(r.FormValue("username"), r.FormValue("password"))
+		if err != nil {
+			http.Error(w, "Error: " + err.Error(), http.StatusInternalServerError)
+			return
+		}
+		if !loggedin {
+			http.Error(w, "Password is incorrect", http.StatusUnauthorized)
+			return
+		}
+		session, err := sessionStore.Get(r, "user")
+		if err != nil {
+			http.Error(w, "Internal Server Error: " + err.Error(), http.StatusInternalServerError)
+			return
+		}
+		session.Values["username"] = r.FormValue("username")
+		session.Values["password"] = r.FormValue("password")
+		session.Save(r, w)
+		http.Redirect(w, r, "/", http.StatusFound)
+	}
+}
+func logout(w http.ResponseWriter, r *http.Request) {
+	session, err := sessionStore.Get(r, "user")
+	if err != nil {
+		http.Error(w, "Internal Server Error: " + err.Error(), http.StatusInternalServerError)
+		return
+	}
+	delete(session.Values, "username")
+	delete(session.Values, "password")
+	session.Save(r, w)
+	http.Redirect(w, r, "/", http.StatusFound)
+}
+func account(w http.ResponseWriter, r *http.Request) {
+	username, err, status := authUser(r)
+	if err != nil {
+		http.Error(w, err.Error(), status)
+		return
+	}
+	guides, err := DBgetOfUser(username)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+	executeTemplate(w, "account.html", struct{Username string; Guides []struct{Title string; Subject string}}{username, guides})
+}
+func createAccount(w http.ResponseWriter, r *http.Request) {
+	_, err, status := authUser(r)
+	if status != http.StatusUnauthorized {
+		http.Redirect(w, r, "/", http.StatusFound)
+		return
+	} else if err != nil {
+		http.Error(w, "Internal Server Error: " + err.Error(), http.StatusInternalServerError)
+		return
+	}
+	switch r.Method {
+	case "GET":
+		executeTemplate(w, "createAccount.html", "")
+	case "POST":
+		if r.FormValue("username") == "" || r.FormValue("password") == "" {
+			http.Error(w, "Either the username or the password is missing", http.StatusBadRequest)
+			return
+		}
+		err = DBcreateUser(r.FormValue("username"), r.FormValue("password"))
+		if err != nil {
+			http.Error(w, "Error: " + err.Error(), http.StatusInternalServerError)
+			return
+		}
+		session, err := sessionStore.Get(r, "user")
+		if err != nil {
+			http.Error(w, "Internal Server Error: " + err.Error(), http.StatusInternalServerError)
+			return
+		}
+		session.Values["username"] = r.FormValue("username")
+		session.Values["password"] = r.FormValue("password")
+		session.Save(r, w)
+		http.Redirect(w, r, "/", http.StatusFound)
+	}
+}
 func authUser(r *http.Request) (string, error, int) { // username, error, status code
 	session, err := sessionStore.Get(r, "user")
 	if err != nil {

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Study Guide Website</title>
+		<link href="/header.css" rel="stylesheet" />
+		<script src="http://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+		<link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+<style>
+	#signin {
+		margin-top: 40px;
+		text-align: center;
+	}
+	#signin table{
+		width: 100%;
+		min-width: 200px;
+		max-width: 1000px;
+		margin-left: auto;
+		margin-right: auto;
+		text-align: center;
+		position: static;
+	}
+	#signin input {
+		width: 100%;
+	}
+</style>
+	</head>
+	<body>
+		<header>
+			<a href="https://stuysu.org"><div id="studentunion"><p>Student Union</p></div></a>
+			<a href="/"><div id="home"><p>Study Guides List</p></div></a>
+			<a href="/about/"><div id="about"><p>About</p></div></a>
+			<a href="/create/"><div id="submit"><p>Submit</p></div></a>
+			<a href="/edit/"><div id="edit"><p>Edit</p></div></a>
+		</header>
+		<div id="signin">
+			<p><form method="POST" action="/createAccount">
+				<div id="signingoogle">Or set up with your @stuy.edu account: <!--OAuth2 coming soon--></div>
+				<p><table>
+					<tr><td>Stuy Email: </td><td><input type="email" name="email" /></td></tr>
+					<tr><td>Username: </td><td><input type="text" name="username" /></td></tr>
+					<tr><td>Password: </td><td><input type="password" name="password" /></td></tr>
+					<tr><td></td><td><input type="submit" value="LogIn!" /></td></tr>
+				</table></p>
+			</form>
+		</div>
+	</body>
+</html>

@@ -2,18 +2,8 @@
 <html>
 	<head>
 		<meta charset="utf-8">
-		<title>Study Guide Website</title>
-		<script>
-var MainTeacherSubjectObject = {
-	"Biology": [['AP Biology','Linnaeus','Mendel','Darwin'], ['Modern Biology','Linnaeus','Mendel','Darwin'], ['Living Environment','Linnaeus','Mendel','Darwin'], ['AT Biology','Linnaeus','Mendel','Darwin'],['Health','Linnaeus','Mendel','Darwin']],
-	"Social Studies": [['Big History','Herodotus','Thucydides','Boorstein'], ['Global Studies','Herodotus','Thucydides','Boorstein'], ['AT History', 'Herodotus','Thucydides','Boorstein']],
-	"Art Appreciation": [['Art Appreciation','Arellius','Michaelangelo','Picasso']],
-	"Music Appreciation": [['Guitar App','Pythagoras','Beethoven','Thelonius Monk'], ['Music App','Pythagoras','Beethoven','Thelonius Monk'], ['GuitarBand App','Pythagoras','Beethoven','Thelonius Monk']],
-	"Math": [['Algebra and Geometry','Pythagoras','Euler','Gauss'], ['Geometry','Pythagoras','Euler','Gauss'], ['Honors Geometry','Pythagoras','Euler','Gauss'], ['Algebra II','Pythagoras','Euler','Gauss'], ['Pre-Calculus','Pythagoras','Euler','Gauss'],]
-};
-		</script>
-		<script src="/static/tableformat.js"></script>
-		<link href="/static/header.css" rel="stylesheet" />
+		<title>{{.Username}}'s account</title>
+		<link href="/header.css" rel="stylesheet" />
 		<script src="http://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
 		<link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
 <style>
@@ -57,7 +47,6 @@ var MainTeacherSubjectObject = {
 		padding: 4px 4px 0px 4px;
 		border: 1px solid lightgrey;
 		margin-bottom: 5px;
-		margin-top: 30px;
 	}
 	#studyguidelisting h3 {
 		margin-left: 2em;
@@ -72,23 +61,40 @@ var MainTeacherSubjectObject = {
 		height: 0px;
 		display: none;
 	}
+	#account {
+		width: 100%;
+		margin-top: 50px;
+		background: white;
+		padding: 20px;
+	}
 </style>
 	</head>
 	<body>
 		<header>
 			<a href="https://stuysu.org"><div id="studentunion"><p>Student Union</p></div></a>
+			<a href="/login"><div id="login" >
+				<p>Login / Sign Up</p>
+			</div></a>
+			<a href="/account/{{.Username}}"><div id="useraccount">
+				<p>{{.Username}}</p>
+			</div></a>
 			<a href="/"><div id="home"><p>Study Guides List</p></div></a>
-			<a href="/about"><div id="about"><p>About</p></div></a>
-			<a href="/create"><div id="submit"><p>Submit</p></div></a>
+			<a href="/about/"><div id="about"><p>About</p></div></a>
+			<a href="/create/"><div id="submit"><p>Submit</p></div></a>
 			<a href="/edit/"><div id="edit"><p>Edit</p></div></a>
+			<!--<div id="searchbar">
+				<input id="searchinput" onfocus="showsearchbar()" onblur="blursearchbar()" type="text" />
+				<div id="searchlogo"></div>
+			</div>-->
 		</header>
-		<div id="table"></div>
-		<div id="studyguidelisting">
-			{{range .}}
-				<h2><a href="/guide/{{.Title}}">{{.Subject}} - {{.Title}}</a></h2>
-			{{end}}
+		<div id="account">
+			<div id="username"><h1>{{.Username}}</h1></div>
+			<form action="/logout" method="POST"><input type="submit" value="Log Out"></form>
+			<div id="studyguidelisting">
+				{{range .Guides}}
+					<h2><a href="/guide/{{.Title}}">{{.Subject}} - {{.Title}}</a></h2>
+				{{end}}
+			</div>
 		</div>
-		<script>
-		</script>
 	</body>
 </html>
