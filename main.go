@@ -161,12 +161,13 @@ func create(w http.ResponseWriter, r *http.Request) {
 // User methods: {{{
 func login(w http.ResponseWriter, r *http.Request) {
 	_, err, status := authUser(r)
-	if status != http.StatusUnauthorized {
+	if err != nil {
+		if status != http.StatusUnauthorized {
+			http.Error(w, "Internal Server Error: " + err.Error(), http.StatusInternalServerError)
+			return
+		}
+	} else {
 		http.Redirect(w, r, "/", http.StatusFound)
-		return
-	} else if err != nil {
-		http.Error(w, "Internal Server Error: " + err.Error(), http.StatusInternalServerError)
-		return
 	}
 	switch r.Method {
 	case "GET":
@@ -221,12 +222,13 @@ func account(w http.ResponseWriter, r *http.Request) {
 }
 func createAccount(w http.ResponseWriter, r *http.Request) {
 	_, err, status := authUser(r)
-	if status != http.StatusUnauthorized {
+	if err != nil {
+		if status != http.StatusUnauthorized {
+			http.Error(w, "Internal Server Error: " + err.Error(), http.StatusInternalServerError)
+			return
+		}
+	} else {
 		http.Redirect(w, r, "/", http.StatusFound)
-		return
-	} else if err != nil {
-		http.Error(w, "Internal Server Error: " + err.Error(), http.StatusInternalServerError)
-		return
 	}
 	switch r.Method {
 	case "GET":

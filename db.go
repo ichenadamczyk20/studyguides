@@ -30,7 +30,7 @@ func DBclose() {db.Close()}
 
 // Study guide methods {{{
 func DBinsert(subject, title, content, delta, creator string) error {
-	_, err := db.Exec("INSERT INTO guides (subject, title, content, delta, creator) VALUES (?, ?, ?, ?)", subject, title, content, delta, creator)
+	_, err := db.Exec("INSERT INTO guides (subject, title, content, delta, creator) VALUES (?, ?, ?, ?, ?)", subject, title, content, delta, creator)
 	return err
 }
 func DBedit(title, content, delta string) error {
